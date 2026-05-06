@@ -47,7 +47,7 @@ server:
 api-configuration:
   core-lending:
     asset-finance:
-      base-path: ${ASSET_FINANCE_URL:http://localhost:8090}
+      base-path: ${ENDPOINT_CORE_LENDING_ASSET_FINANCE:http://localhost:8090}
 
 springdoc:
   api-docs:
