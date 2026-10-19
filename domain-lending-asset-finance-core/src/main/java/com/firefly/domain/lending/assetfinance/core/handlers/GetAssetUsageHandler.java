@@ -2,7 +2,7 @@ package com.firefly.domain.lending.assetfinance.core.handlers;
 
 import com.firefly.core.lending.assetfinance.sdk.api.UsageRecordApi;
 import com.firefly.core.lending.assetfinance.sdk.model.FilterRequestUsageRecordDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseUsageRecordDTO;
 import com.firefly.domain.lending.assetfinance.core.commands.GetAssetUsageQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Slf4j
 @QueryHandlerComponent
-public class GetAssetUsageHandler extends QueryHandler<GetAssetUsageQuery, PaginationResponse> {
+public class GetAssetUsageHandler extends QueryHandler<GetAssetUsageQuery, PaginationResponseUsageRecordDTO> {
 
     private final UsageRecordApi usageApi;
 
@@ -29,7 +29,7 @@ public class GetAssetUsageHandler extends QueryHandler<GetAssetUsageQuery, Pagin
     }
 
     @Override
-    protected Mono<PaginationResponse> doHandle(GetAssetUsageQuery query) {
+    protected Mono<PaginationResponseUsageRecordDTO> doHandle(GetAssetUsageQuery query) {
         log.debug("Listing usage records for asset: agreementId={}, assetId={}", query.getAgreementId(), query.getAssetId());
         return usageApi.findAll3(query.getAgreementId(), query.getAssetId(), new FilterRequestUsageRecordDTO(), UUID.randomUUID().toString());
     }

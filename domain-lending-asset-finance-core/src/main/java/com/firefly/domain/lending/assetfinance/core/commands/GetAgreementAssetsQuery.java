@@ -1,6 +1,6 @@
 package com.firefly.domain.lending.assetfinance.core.commands;
 
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
 import jakarta.validation.constraints.NotNull;
 import org.fireflyframework.cqrs.query.Query;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Query to list all physical assets registered under an agreement.
  */
-public class GetAgreementAssetsQuery implements Query<PaginationResponse> {
+public class GetAgreementAssetsQuery implements Query<PaginationResponseAssetFinanceAssetDTO> {
 
     @NotNull
     private final UUID agreementId;

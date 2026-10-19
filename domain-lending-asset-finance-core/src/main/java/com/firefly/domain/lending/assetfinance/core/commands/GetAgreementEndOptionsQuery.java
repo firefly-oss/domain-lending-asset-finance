@@ -1,6 +1,6 @@
 package com.firefly.domain.lending.assetfinance.core.commands;
 
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
 import jakarta.validation.constraints.NotNull;
 import org.fireflyframework.cqrs.query.Query;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Query to list all lease-end purchase options for an agreement.
  */
-public class GetAgreementEndOptionsQuery implements Query<PaginationResponse> {
+public class GetAgreementEndOptionsQuery implements Query<PaginationResponseEndOptionDTO> {
 
     @NotNull
     private final UUID agreementId;

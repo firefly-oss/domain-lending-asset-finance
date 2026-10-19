@@ -4,7 +4,13 @@ import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAgreementDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.DeliveryRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.EndOptionDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseReturnRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseServiceEventDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseUsageRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.PickupRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.ReturnRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.ServiceEventDTO;
@@ -56,7 +62,7 @@ public interface AssetFinanceService {
      * @param agreementId the unique identifier of the agreement
      * @return a paginated list of assets
      */
-    Mono<PaginationResponse> getAgreementAssets(UUID agreementId);
+    Mono<PaginationResponseAssetFinanceAssetDTO> getAgreementAssets(UUID agreementId);
 
     /**
      * Registers a physical asset under an agreement.
@@ -85,7 +91,7 @@ public interface AssetFinanceService {
      * @param assetId     the unique identifier of the asset
      * @return a paginated list of delivery records
      */
-    Mono<PaginationResponse> getAssetDeliveries(UUID agreementId, UUID assetId);
+    Mono<PaginationResponseDeliveryRecordDTO> getAssetDeliveries(UUID agreementId, UUID assetId);
 
     /**
      * Creates a delivery record for an asset.
@@ -106,7 +112,7 @@ public interface AssetFinanceService {
      * @param assetId     the unique identifier of the asset
      * @return a paginated list of pickup records
      */
-    Mono<PaginationResponse> getAssetPickups(UUID agreementId, UUID assetId);
+    Mono<PaginationResponsePickupRecordDTO> getAssetPickups(UUID agreementId, UUID assetId);
 
     /**
      * Creates a pickup record for an asset.
@@ -127,7 +133,7 @@ public interface AssetFinanceService {
      * @param assetId     the unique identifier of the asset
      * @return a paginated list of return records
      */
-    Mono<PaginationResponse> getAssetReturns(UUID agreementId, UUID assetId);
+    Mono<PaginationResponseReturnRecordDTO> getAssetReturns(UUID agreementId, UUID assetId);
 
     /**
      * Creates a return and condition assessment record for an asset.
@@ -148,7 +154,7 @@ public interface AssetFinanceService {
      * @param assetId     the unique identifier of the asset
      * @return a paginated list of service events
      */
-    Mono<PaginationResponse> getAssetServiceEvents(UUID agreementId, UUID assetId);
+    Mono<PaginationResponseServiceEventDTO> getAssetServiceEvents(UUID agreementId, UUID assetId);
 
     /**
      * Logs a service event (maintenance, damage, inspection) for an asset.
@@ -169,7 +175,7 @@ public interface AssetFinanceService {
      * @param assetId     the unique identifier of the asset
      * @return a paginated list of usage records
      */
-    Mono<PaginationResponse> getAssetUsage(UUID agreementId, UUID assetId);
+    Mono<PaginationResponseUsageRecordDTO> getAssetUsage(UUID agreementId, UUID assetId);
 
     /**
      * Records a usage snapshot (mileage, operating hours) for an asset.
@@ -189,7 +195,7 @@ public interface AssetFinanceService {
      * @param agreementId the unique identifier of the agreement
      * @return a paginated list of end options
      */
-    Mono<PaginationResponse> getAgreementEndOptions(UUID agreementId);
+    Mono<PaginationResponseEndOptionDTO> getAgreementEndOptions(UUID agreementId);
 
     /**
      * Creates a lease-end purchase option for an agreement.

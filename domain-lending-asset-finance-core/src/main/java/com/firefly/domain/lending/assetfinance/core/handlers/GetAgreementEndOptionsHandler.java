@@ -2,7 +2,7 @@ package com.firefly.domain.lending.assetfinance.core.handlers;
 
 import com.firefly.core.lending.assetfinance.sdk.api.EndOptionApi;
 import com.firefly.core.lending.assetfinance.sdk.model.FilterRequestEndOptionDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
 import com.firefly.domain.lending.assetfinance.core.commands.GetAgreementEndOptionsQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Slf4j
 @QueryHandlerComponent
-public class GetAgreementEndOptionsHandler extends QueryHandler<GetAgreementEndOptionsQuery, PaginationResponse> {
+public class GetAgreementEndOptionsHandler extends QueryHandler<GetAgreementEndOptionsQuery, PaginationResponseEndOptionDTO> {
 
     private final EndOptionApi endOptionApi;
 
@@ -29,7 +29,7 @@ public class GetAgreementEndOptionsHandler extends QueryHandler<GetAgreementEndO
     }
 
     @Override
-    protected Mono<PaginationResponse> doHandle(GetAgreementEndOptionsQuery query) {
+    protected Mono<PaginationResponseEndOptionDTO> doHandle(GetAgreementEndOptionsQuery query) {
         log.debug("Listing end options for agreement: agreementId={}", query.getAgreementId());
         return endOptionApi.findAll1(query.getAgreementId(), new FilterRequestEndOptionDTO(), UUID.randomUUID().toString());
     }

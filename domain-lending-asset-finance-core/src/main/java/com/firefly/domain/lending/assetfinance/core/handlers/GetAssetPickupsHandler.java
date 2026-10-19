@@ -2,7 +2,7 @@ package com.firefly.domain.lending.assetfinance.core.handlers;
 
 import com.firefly.core.lending.assetfinance.sdk.api.PickupRecordApi;
 import com.firefly.core.lending.assetfinance.sdk.model.FilterRequestPickupRecordDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
 import com.firefly.domain.lending.assetfinance.core.commands.GetAssetPickupsQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Slf4j
 @QueryHandlerComponent
-public class GetAssetPickupsHandler extends QueryHandler<GetAssetPickupsQuery, PaginationResponse> {
+public class GetAssetPickupsHandler extends QueryHandler<GetAssetPickupsQuery, PaginationResponsePickupRecordDTO> {
 
     private final PickupRecordApi pickupApi;
 
@@ -29,7 +29,7 @@ public class GetAssetPickupsHandler extends QueryHandler<GetAssetPickupsQuery, P
     }
 
     @Override
-    protected Mono<PaginationResponse> doHandle(GetAssetPickupsQuery query) {
+    protected Mono<PaginationResponsePickupRecordDTO> doHandle(GetAssetPickupsQuery query) {
         log.debug("Listing pickups for asset: agreementId={}, assetId={}", query.getAgreementId(), query.getAssetId());
         return pickupApi.findAll6(query.getAgreementId(), query.getAssetId(), new FilterRequestPickupRecordDTO(), UUID.randomUUID().toString());
     }

@@ -4,7 +4,13 @@ import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAgreementDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.DeliveryRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.EndOptionDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseReturnRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseServiceEventDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseUsageRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.PickupRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.ReturnRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.ServiceEventDTO;
@@ -71,7 +77,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── Assets ───────────────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAgreementAssets(UUID agreementId) {
+    public Mono<PaginationResponseAssetFinanceAssetDTO> getAgreementAssets(UUID agreementId) {
         return queryBus.query(new GetAgreementAssetsQuery(agreementId));
     }
 
@@ -88,7 +94,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── Deliveries ───────────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAssetDeliveries(UUID agreementId, UUID assetId) {
+    public Mono<PaginationResponseDeliveryRecordDTO> getAssetDeliveries(UUID agreementId, UUID assetId) {
         return queryBus.query(new GetAssetDeliveriesQuery(agreementId, assetId));
     }
 
@@ -100,7 +106,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── Pickups ──────────────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAssetPickups(UUID agreementId, UUID assetId) {
+    public Mono<PaginationResponsePickupRecordDTO> getAssetPickups(UUID agreementId, UUID assetId) {
         return queryBus.query(new GetAssetPickupsQuery(agreementId, assetId));
     }
 
@@ -112,7 +118,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── Returns ──────────────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAssetReturns(UUID agreementId, UUID assetId) {
+    public Mono<PaginationResponseReturnRecordDTO> getAssetReturns(UUID agreementId, UUID assetId) {
         return queryBus.query(new GetAssetReturnsQuery(agreementId, assetId));
     }
 
@@ -124,7 +130,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── Service Events ───────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAssetServiceEvents(UUID agreementId, UUID assetId) {
+    public Mono<PaginationResponseServiceEventDTO> getAssetServiceEvents(UUID agreementId, UUID assetId) {
         return queryBus.query(new GetAssetServiceEventsQuery(agreementId, assetId));
     }
 
@@ -136,7 +142,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── Usage ────────────────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAssetUsage(UUID agreementId, UUID assetId) {
+    public Mono<PaginationResponseUsageRecordDTO> getAssetUsage(UUID agreementId, UUID assetId) {
         return queryBus.query(new GetAssetUsageQuery(agreementId, assetId));
     }
 
@@ -148,7 +154,7 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     // ── End Options ──────────────────────────────────────────────────────────
 
     @Override
-    public Mono<PaginationResponse> getAgreementEndOptions(UUID agreementId) {
+    public Mono<PaginationResponseEndOptionDTO> getAgreementEndOptions(UUID agreementId) {
         return queryBus.query(new GetAgreementEndOptionsQuery(agreementId));
     }
 

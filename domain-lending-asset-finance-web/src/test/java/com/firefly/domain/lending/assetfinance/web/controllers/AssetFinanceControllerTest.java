@@ -3,15 +3,16 @@ package com.firefly.domain.lending.assetfinance.web.controllers;
 import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAgreementDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.EndOptionDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
 import com.firefly.domain.lending.assetfinance.core.services.AssetFinanceService;
 import org.fireflyframework.web.error.config.ErrorHandlingProperties;
 import org.fireflyframework.web.error.converter.ExceptionConverterService;
 import org.fireflyframework.web.error.service.ErrorResponseNegotiator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -33,16 +34,16 @@ class AssetFinanceControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     private AssetFinanceService assetFinanceService;
 
     // Required by GlobalExceptionHandler (org.fireflyframework.web v26.02.07)
     // Non-Optional constructor params not provided by the @WebFluxTest slice
-    @MockBean
+    @MockitoBean
     private ExceptionConverterService exceptionConverterService;
-    @MockBean
+    @MockitoBean
     private ErrorHandlingProperties errorHandlingProperties;
-    @MockBean
+    @MockitoBean
     private ErrorResponseNegotiator errorResponseNegotiator;
 
     // ── Agreement tests ──────────────────────────────────────────────────────
@@ -120,14 +121,14 @@ class AssetFinanceControllerTest {
     @Test
     void getAgreementAssets_returns200() {
         var agreementId = UUID.randomUUID();
-        var page = new PaginationResponse();
+        var page = new PaginationResponseAssetFinanceAssetDTO();
         when(assetFinanceService.getAgreementAssets(agreementId)).thenReturn(Mono.just(page));
 
         webTestClient.get()
                 .uri("/api/v1/asset-finance/agreements/{agreementId}/assets", agreementId)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(PaginationResponse.class);
+                .expectBody(PaginationResponseAssetFinanceAssetDTO.class);
     }
 
     @Test
@@ -162,14 +163,14 @@ class AssetFinanceControllerTest {
     @Test
     void getAgreementEndOptions_returns200() {
         var agreementId = UUID.randomUUID();
-        var page = new PaginationResponse();
+        var page = new PaginationResponseEndOptionDTO();
         when(assetFinanceService.getAgreementEndOptions(agreementId)).thenReturn(Mono.just(page));
 
         webTestClient.get()
                 .uri("/api/v1/asset-finance/agreements/{agreementId}/end-options", agreementId)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(PaginationResponse.class);
+                .expectBody(PaginationResponseEndOptionDTO.class);
     }
 
     @Test

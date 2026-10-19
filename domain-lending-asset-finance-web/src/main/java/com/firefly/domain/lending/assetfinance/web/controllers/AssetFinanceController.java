@@ -4,7 +4,13 @@ import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAgreementDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.DeliveryRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.EndOptionDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseReturnRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseServiceEventDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseUsageRecordDTO;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.PickupRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.ReturnRecordDTO;
 import com.firefly.core.lending.assetfinance.sdk.model.ServiceEventDTO;
@@ -125,9 +131,9 @@ public class AssetFinanceController {
     @Operation(summary = "List assets", description = "Lists all physical assets registered under an agreement.")
     @ApiResponse(responseCode = "200", description = "Assets listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponseAssetFinanceAssetDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/assets", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAgreementAssets(
+    public Mono<ResponseEntity<PaginationResponseAssetFinanceAssetDTO>> getAgreementAssets(
             @Parameter(description = "Unique identifier of the agreement", required = true)
             @PathVariable UUID agreementId) {
         return assetFinanceService.getAgreementAssets(agreementId)
@@ -194,9 +200,9 @@ public class AssetFinanceController {
     @Operation(summary = "List deliveries", description = "Lists all delivery records for an asset.")
     @ApiResponse(responseCode = "200", description = "Deliveries listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponseDeliveryRecordDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/assets/{assetId}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAssetDeliveries(
+    public Mono<ResponseEntity<PaginationResponseDeliveryRecordDTO>> getAssetDeliveries(
             @PathVariable UUID agreementId, @PathVariable UUID assetId) {
         return assetFinanceService.getAssetDeliveries(agreementId, assetId)
                 .map(ResponseEntity::ok);
@@ -234,9 +240,9 @@ public class AssetFinanceController {
     @Operation(summary = "List pickups", description = "Lists all pickup records for an asset.")
     @ApiResponse(responseCode = "200", description = "Pickups listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponsePickupRecordDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/assets/{assetId}/pickups", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAssetPickups(
+    public Mono<ResponseEntity<PaginationResponsePickupRecordDTO>> getAssetPickups(
             @PathVariable UUID agreementId, @PathVariable UUID assetId) {
         return assetFinanceService.getAssetPickups(agreementId, assetId)
                 .map(ResponseEntity::ok);
@@ -274,9 +280,9 @@ public class AssetFinanceController {
     @Operation(summary = "List returns", description = "Lists all return records for an asset.")
     @ApiResponse(responseCode = "200", description = "Returns listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponseReturnRecordDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/assets/{assetId}/returns", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAssetReturns(
+    public Mono<ResponseEntity<PaginationResponseReturnRecordDTO>> getAssetReturns(
             @PathVariable UUID agreementId, @PathVariable UUID assetId) {
         return assetFinanceService.getAssetReturns(agreementId, assetId)
                 .map(ResponseEntity::ok);
@@ -314,9 +320,9 @@ public class AssetFinanceController {
     @Operation(summary = "List service events", description = "Lists all service events logged for an asset.")
     @ApiResponse(responseCode = "200", description = "Events listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponseServiceEventDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/assets/{assetId}/service-events", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAssetServiceEvents(
+    public Mono<ResponseEntity<PaginationResponseServiceEventDTO>> getAssetServiceEvents(
             @PathVariable UUID agreementId, @PathVariable UUID assetId) {
         return assetFinanceService.getAssetServiceEvents(agreementId, assetId)
                 .map(ResponseEntity::ok);
@@ -354,9 +360,9 @@ public class AssetFinanceController {
     @Operation(summary = "List usage records", description = "Lists all usage snapshots for an asset.")
     @ApiResponse(responseCode = "200", description = "Usage records listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponseUsageRecordDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/assets/{assetId}/usage", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAssetUsage(
+    public Mono<ResponseEntity<PaginationResponseUsageRecordDTO>> getAssetUsage(
             @PathVariable UUID agreementId, @PathVariable UUID assetId) {
         return assetFinanceService.getAssetUsage(agreementId, assetId)
                 .map(ResponseEntity::ok);
@@ -393,9 +399,9 @@ public class AssetFinanceController {
     @Operation(summary = "List end options", description = "Lists all lease-end purchase options for an agreement.")
     @ApiResponse(responseCode = "200", description = "End options listed",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PaginationResponse.class)))
+                    schema = @Schema(implementation = PaginationResponseEndOptionDTO.class)))
     @GetMapping(value = "/agreements/{agreementId}/end-options", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PaginationResponse>> getAgreementEndOptions(
+    public Mono<ResponseEntity<PaginationResponseEndOptionDTO>> getAgreementEndOptions(
             @Parameter(description = "Unique identifier of the agreement", required = true)
             @PathVariable UUID agreementId) {
         return assetFinanceService.getAgreementEndOptions(agreementId)

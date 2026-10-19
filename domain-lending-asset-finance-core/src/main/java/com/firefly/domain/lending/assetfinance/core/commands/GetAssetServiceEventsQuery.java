@@ -1,6 +1,6 @@
 package com.firefly.domain.lending.assetfinance.core.commands;
 
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseServiceEventDTO;
 import jakarta.validation.constraints.NotNull;
 import org.fireflyframework.cqrs.query.Query;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Query to list all service events logged against an asset.
  */
-public class GetAssetServiceEventsQuery implements Query<PaginationResponse> {
+public class GetAssetServiceEventsQuery implements Query<PaginationResponseServiceEventDTO> {
 
     @NotNull
     private final UUID agreementId;

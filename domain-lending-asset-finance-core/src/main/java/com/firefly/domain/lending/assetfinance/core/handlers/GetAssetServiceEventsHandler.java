@@ -2,7 +2,7 @@ package com.firefly.domain.lending.assetfinance.core.handlers;
 
 import com.firefly.core.lending.assetfinance.sdk.api.ServiceEventApi;
 import com.firefly.core.lending.assetfinance.sdk.model.FilterRequestServiceEventDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseServiceEventDTO;
 import com.firefly.domain.lending.assetfinance.core.commands.GetAssetServiceEventsQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Slf4j
 @QueryHandlerComponent
-public class GetAssetServiceEventsHandler extends QueryHandler<GetAssetServiceEventsQuery, PaginationResponse> {
+public class GetAssetServiceEventsHandler extends QueryHandler<GetAssetServiceEventsQuery, PaginationResponseServiceEventDTO> {
 
     private final ServiceEventApi serviceEventApi;
 
@@ -29,7 +29,7 @@ public class GetAssetServiceEventsHandler extends QueryHandler<GetAssetServiceEv
     }
 
     @Override
-    protected Mono<PaginationResponse> doHandle(GetAssetServiceEventsQuery query) {
+    protected Mono<PaginationResponseServiceEventDTO> doHandle(GetAssetServiceEventsQuery query) {
         log.debug("Listing service events for asset: agreementId={}, assetId={}", query.getAgreementId(), query.getAssetId());
         return serviceEventApi.findAll4(query.getAgreementId(), query.getAssetId(), new FilterRequestServiceEventDTO(), UUID.randomUUID().toString());
     }

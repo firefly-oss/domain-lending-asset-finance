@@ -2,7 +2,7 @@ package com.firefly.domain.lending.assetfinance.core.handlers;
 
 import com.firefly.core.lending.assetfinance.sdk.api.DeliveryRecordApi;
 import com.firefly.core.lending.assetfinance.sdk.model.FilterRequestDeliveryRecordDTO;
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
 import com.firefly.domain.lending.assetfinance.core.commands.GetAssetDeliveriesQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Slf4j
 @QueryHandlerComponent
-public class GetAssetDeliveriesHandler extends QueryHandler<GetAssetDeliveriesQuery, PaginationResponse> {
+public class GetAssetDeliveriesHandler extends QueryHandler<GetAssetDeliveriesQuery, PaginationResponseDeliveryRecordDTO> {
 
     private final DeliveryRecordApi deliveryApi;
 
@@ -29,7 +29,7 @@ public class GetAssetDeliveriesHandler extends QueryHandler<GetAssetDeliveriesQu
     }
 
     @Override
-    protected Mono<PaginationResponse> doHandle(GetAssetDeliveriesQuery query) {
+    protected Mono<PaginationResponseDeliveryRecordDTO> doHandle(GetAssetDeliveriesQuery query) {
         log.debug("Listing deliveries for asset: agreementId={}, assetId={}", query.getAgreementId(), query.getAssetId());
         return deliveryApi.findAll7(query.getAgreementId(), query.getAssetId(), new FilterRequestDeliveryRecordDTO(), UUID.randomUUID().toString());
     }

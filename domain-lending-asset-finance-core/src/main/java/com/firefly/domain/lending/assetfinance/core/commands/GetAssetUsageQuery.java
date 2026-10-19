@@ -1,6 +1,6 @@
 package com.firefly.domain.lending.assetfinance.core.commands;
 
-import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponse;
+import com.firefly.core.lending.assetfinance.sdk.model.PaginationResponseUsageRecordDTO;
 import jakarta.validation.constraints.NotNull;
 import org.fireflyframework.cqrs.query.Query;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Query to list all usage records (mileage / operating hours) for an asset.
  */
-public class GetAssetUsageQuery implements Query<PaginationResponse> {
+public class GetAssetUsageQuery implements Query<PaginationResponseUsageRecordDTO> {
 
     @NotNull
     private final UUID agreementId;
