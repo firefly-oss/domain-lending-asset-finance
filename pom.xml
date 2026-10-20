@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>domain-lending-asset-finance</artifactId>
+    <name>domain-lending-asset-finance</name>
     <version>26.10.3</version>
     <packaging>pom</packaging>
     <modules>
