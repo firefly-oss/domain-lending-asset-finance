@@ -1,0 +1,36 @@
+package io.fireflysoftware.domain.lending.assetfinance.core.handlers;
+
+import io.fireflysoftware.core.lending.assetfinance.sdk.api.EndOptionApi;
+import io.fireflysoftware.core.lending.assetfinance.sdk.model.FilterRequestEndOptionDTO;
+import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseEndOptionDTO;
+import io.fireflysoftware.domain.lending.assetfinance.core.commands.GetAgreementEndOptionsQuery;
+import lombok.extern.slf4j.Slf4j;
+import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
+import org.fireflyframework.cqrs.query.QueryHandler;
+import reactor.core.publisher.Mono;
+import java.util.UUID;
+
+/**
+ * Handles {@link GetAgreementEndOptionsQuery} by listing end options from core-lending-asset-finance.
+ */
+@Slf4j
+@QueryHandlerComponent
+public class GetAgreementEndOptionsHandler extends QueryHandler<GetAgreementEndOptionsQuery, PaginationResponseEndOptionDTO> {
+
+    private final EndOptionApi endOptionApi;
+
+    /**
+     * Creates a new GetAgreementEndOptionsHandler.
+     *
+     * @param endOptionApi the SDK client for end option operations
+     */
+    public GetAgreementEndOptionsHandler(EndOptionApi endOptionApi) {
+        this.endOptionApi = endOptionApi;
+    }
+
+    @Override
+    protected Mono<PaginationResponseEndOptionDTO> doHandle(GetAgreementEndOptionsQuery query) {
+        log.debug("Listing end options for agreement: agreementId={}", query.getAgreementId());
+        return endOptionApi.findAll1(query.getAgreementId(), new FilterRequestEndOptionDTO(), UUID.randomUUID().toString());
+    }
+}
