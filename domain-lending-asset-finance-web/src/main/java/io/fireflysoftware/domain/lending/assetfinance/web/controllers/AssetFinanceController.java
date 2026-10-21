@@ -33,6 +33,8 @@ import io.fireflysoftware.core.lending.assetfinance.sdk.model.ReturnRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.ServiceEventDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.UsageRecordDTO;
 import io.fireflysoftware.domain.lending.assetfinance.core.services.AssetFinanceService;
+import io.fireflysoftware.domain.lending.assetfinance.interfaces.dtos.ReasonRequest;
+import io.fireflysoftware.domain.lending.assetfinance.interfaces.dtos.StatusChangeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,7 +66,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/asset-finance")
-@Tag(name = "Asset Finance", description = "Domain-level orchestration for asset finance workflows (renting and leasing)")
+@Tag(name = "Asset Finance", description = "Asset finance agreements. Product kinds: LEASING, a financial lease with a purchase option, and RENTING, an operating rental without a purchase option.")
 public class AssetFinanceController {
 
     private final AssetFinanceService assetFinanceService;
@@ -77,7 +79,7 @@ public class AssetFinanceController {
      * @param dto the agreement payload
      * @return 201 Created with the new agreement, or 400 on invalid input
      */
-    @Operation(summary = "Create agreement", description = "Creates a new asset finance agreement.")
+    @Operation(summary = "Create agreement", description = "Runs the register saga. The financeType is LEASING or RENTING and is passed through to the asset finance core.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Agreement created",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -120,7 +122,7 @@ public class AssetFinanceController {
      * @param dto         the updated agreement payload
      * @return 200 with the updated agreement, or 404 if not found
      */
-    @Operation(summary = "Update agreement", description = "Updates an existing asset finance agreement.")
+    @Operation(summary = "Update agreement", description = "Runs the update saga. Status is left unchanged. The financeType on the body is passed through.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Agreement updated",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -133,6 +135,40 @@ public class AssetFinanceController {
             @PathVariable UUID agreementId,
             @RequestBody AssetFinanceAgreementDTO dto) {
         return assetFinanceService.updateAgreement(agreementId, dto)
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    @Operation(summary = "Update status", description = "Runs the status saga. The stored product kind is kept.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Agreement updated",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AssetFinanceAgreementDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Agreement not found", content = @Content)
+    })
+    @PutMapping(value = "/agreements/{agreementId}/status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<AssetFinanceAgreementDTO>> updateAgreementStatus(
+            @Parameter(description = "Unique identifier of the agreement", required = true)
+            @PathVariable UUID agreementId,
+            @RequestBody StatusChangeRequest request) {
+        return assetFinanceService.updateAgreementStatus(agreementId, request.getStatus(), request.getStatusReason())
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    @Operation(summary = "Close agreement", description = "Closes the agreement when the asset finance core allows CLOSED.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Agreement closed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AssetFinanceAgreementDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Agreement not found", content = @Content)
+    })
+    @PostMapping(value = "/agreements/{agreementId}/close", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<AssetFinanceAgreementDTO>> closeAgreement(
+            @Parameter(description = "Unique identifier of the agreement", required = true)
+            @PathVariable UUID agreementId,
+            @RequestBody ReasonRequest request) {
+        return assetFinanceService.closeAgreement(agreementId, request.getStatusReason())
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }

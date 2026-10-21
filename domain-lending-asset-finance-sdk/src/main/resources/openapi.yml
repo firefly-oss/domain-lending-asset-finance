@@ -7,9 +7,47 @@ servers:
   description: Generated server url
 tags:
 - name: Asset Finance
-  description: Domain-level orchestration for asset finance workflows (renting and
-    leasing)
+  description: "Asset finance agreements. Product kinds: LEASING, a financial lease\
+    \ with a purchase option, and RENTING, an operating rental without a purchase\
+    \ option."
 paths:
+  /api/v1/asset-finance/agreements/{agreementId}/status:
+    put:
+      tags:
+      - Asset Finance
+      summary: Update status
+      description: Runs the status saga. The stored product kind is kept.
+      operationId: updateAgreementStatus
+      parameters:
+      - name: agreementId
+        in: path
+        description: Unique identifier of the agreement
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusChangeRequest"
+        required: true
+      responses:
+        "200":
+          description: Agreement updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetFinanceAgreementDTO"
+        "404":
+          description: Agreement not found
   /api/v1/asset-finance/agreements/{agreementId}/end-options/{optionId}:
     put:
       tags:
@@ -89,7 +127,8 @@ paths:
       tags:
       - Asset Finance
       summary: Update agreement
-      description: Updates an existing asset finance agreement.
+      description: Runs the update saga. Status is left unchanged. The financeType
+        on the body is passed through.
       operationId: updateAgreement
       parameters:
       - name: agreementId
@@ -149,7 +188,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponseEndOptionDTO"
     post:
       tags:
       - Asset Finance
@@ -184,6 +223,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EndOptionDTO"
+  /api/v1/asset-finance/agreements/{agreementId}/close:
+    post:
+      tags:
+      - Asset Finance
+      summary: Close agreement
+      description: Closes the agreement when the asset finance core allows CLOSED.
+      operationId: closeAgreement
+      parameters:
+      - name: agreementId
+        in: path
+        description: Unique identifier of the agreement
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReasonRequest"
+        required: true
+      responses:
+        "200":
+          description: Agreement closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetFinanceAgreementDTO"
+        "404":
+          description: Agreement not found
   /api/v1/asset-finance/agreements/{agreementId}/assets/{assetId}/usage:
     get:
       tags:
@@ -217,7 +293,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponseUsageRecordDTO"
     post:
       tags:
       - Asset Finance
@@ -290,7 +366,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponseServiceEventDTO"
     post:
       tags:
       - Asset Finance
@@ -364,7 +440,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponseReturnRecordDTO"
     post:
       tags:
       - Asset Finance
@@ -437,7 +513,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponsePickupRecordDTO"
     post:
       tags:
       - Asset Finance
@@ -510,7 +586,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponseDeliveryRecordDTO"
     post:
       tags:
       - Asset Finance
@@ -578,7 +654,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginationResponse"
+                $ref: "#/components/schemas/PaginationResponseAssetFinanceAssetDTO"
     post:
       tags:
       - Asset Finance
@@ -620,7 +696,8 @@ paths:
       tags:
       - Asset Finance
       summary: Create agreement
-      description: Creates a new asset finance agreement.
+      description: Runs the register saga. The financeType is LEASING or RENTING and
+        is passed through to the asset finance core.
       operationId: createAgreement
       parameters:
       - name: X-Idempotency-Key
@@ -685,34 +762,13 @@ paths:
           description: Asset not found
 components:
   schemas:
-    EndOptionDTO:
-      required:
-      - assetFinanceAgreementId
-      - optionExerciseDate
-      - optionPaidAmount
+    StatusChangeRequest:
       type: object
       properties:
-        endOptionId:
+        status:
           type: string
-          format: uuid
-        assetFinanceAgreementId:
+        statusReason:
           type: string
-          format: uuid
-        optionExerciseDate:
-          type: string
-          format: date
-        optionPaidAmount:
-          type: number
-        isExercised:
-          type: boolean
-        note:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
     AssetFinanceAgreementDTO:
       required:
       - agreementStatus
@@ -726,9 +782,11 @@ components:
         assetFinanceAgreementId:
           type: string
           format: uuid
+          nullable: true
         loanServicingCaseId:
           type: string
           format: uuid
+          nullable: true
         financeType:
           type: string
           enum:
@@ -754,24 +812,71 @@ components:
           type: string
         servicesIncluded:
           type: boolean
+          nullable: true
         depositAmount:
           type: number
+          nullable: true
         earlyTerminationFee:
           type: number
+          nullable: true
         residualValue:
           type: number
+          nullable: true
         purchaseOptionAvailable:
           type: boolean
+          nullable: true
         purchaseOptionPrice:
           type: number
+          nullable: true
         remarks:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
+          nullable: true
+    EndOptionDTO:
+      required:
+      - assetFinanceAgreementId
+      - optionExerciseDate
+      - optionPaidAmount
+      type: object
+      properties:
+        endOptionId:
+          type: string
+          format: uuid
+          nullable: true
+        assetFinanceAgreementId:
+          type: string
+          format: uuid
+        optionExerciseDate:
+          type: string
+          format: date
+        optionPaidAmount:
+          type: number
+        isExercised:
+          type: boolean
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+    ReasonRequest:
+      type: object
+      properties:
+        statusReason:
+          type: string
     UsageRecordDTO:
       required:
       - assetFinanceAssetId
@@ -781,6 +886,7 @@ components:
         usageRecordId:
           type: string
           format: uuid
+          nullable: true
         assetFinanceAssetId:
           type: string
           format: uuid
@@ -790,14 +896,18 @@ components:
         mileage:
           type: integer
           format: int32
+          nullable: true
         usageDetail:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
+          nullable: true
     ServiceEventDTO:
       required:
       - assetFinanceAssetId
@@ -808,6 +918,7 @@ components:
         serviceEventId:
           type: string
           format: uuid
+          nullable: true
         assetFinanceAssetId:
           type: string
           format: uuid
@@ -824,14 +935,18 @@ components:
           - MODIFICATION
         cost:
           type: number
+          nullable: true
         note:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
+          nullable: true
     ReturnRecordDTO:
       required:
       - actualReturnDate
@@ -842,6 +957,7 @@ components:
         returnRecordId:
           type: string
           format: uuid
+          nullable: true
         assetFinanceAssetId:
           type: string
           format: uuid
@@ -852,16 +968,21 @@ components:
           type: string
         damageCost:
           type: number
+          nullable: true
         isFinalized:
           type: boolean
+          nullable: true
         note:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
+          nullable: true
     PickupRecordDTO:
       required:
       - assetFinanceAssetId
@@ -872,6 +993,7 @@ components:
         pickupRecordId:
           type: string
           format: uuid
+          nullable: true
         assetFinanceAssetId:
           type: string
           format: uuid
@@ -887,50 +1009,69 @@ components:
         scheduledPickupDate:
           type: string
           format: date
+          nullable: true
         actualPickupDate:
           type: string
           format: date
+          nullable: true
         pickupAddress:
           type: string
         pickupCity:
           type: string
+          nullable: true
         pickupState:
           type: string
+          nullable: true
         pickupPostalCode:
           type: string
+          nullable: true
         pickupCountry:
           type: string
+          nullable: true
         carrierName:
           type: string
+          nullable: true
         trackingNumber:
           type: string
+          nullable: true
         collectorName:
           type: string
+          nullable: true
         collectorPhone:
           type: string
+          nullable: true
         collectorEmail:
           type: string
+          nullable: true
         signatureReceived:
           type: boolean
+          nullable: true
         pickupConditionNotes:
           type: string
+          nullable: true
         pickupPhotoUrls:
           type: array
+          nullable: true
           items:
             type: string
         failedPickupReason:
           type: string
+          nullable: true
         pickupAttempts:
           type: integer
           format: int32
+          nullable: true
         note:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
+          nullable: true
     DeliveryRecordDTO:
       required:
       - assetFinanceAssetId
@@ -941,6 +1082,7 @@ components:
         deliveryRecordId:
           type: string
           format: uuid
+          nullable: true
         assetFinanceAssetId:
           type: string
           format: uuid
@@ -956,50 +1098,69 @@ components:
         scheduledDeliveryDate:
           type: string
           format: date
+          nullable: true
         actualDeliveryDate:
           type: string
           format: date
+          nullable: true
         deliveryAddress:
           type: string
         deliveryCity:
           type: string
+          nullable: true
         deliveryState:
           type: string
+          nullable: true
         deliveryPostalCode:
           type: string
+          nullable: true
         deliveryCountry:
           type: string
+          nullable: true
         carrierName:
           type: string
+          nullable: true
         trackingNumber:
           type: string
+          nullable: true
         recipientName:
           type: string
+          nullable: true
         recipientPhone:
           type: string
+          nullable: true
         recipientEmail:
           type: string
+          nullable: true
         signatureReceived:
           type: boolean
+          nullable: true
         deliveryConditionNotes:
           type: string
+          nullable: true
         deliveryPhotoUrls:
           type: array
+          nullable: true
           items:
             type: string
         failedDeliveryReason:
           type: string
+          nullable: true
         deliveryAttempts:
           type: integer
           format: int32
+          nullable: true
         note:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
+          nullable: true
     AssetFinanceAssetDTO:
       required:
       - assetDescription
@@ -1012,6 +1173,7 @@ components:
         assetFinanceAssetId:
           type: string
           format: uuid
+          nullable: true
         assetFinanceAgreementId:
           type: string
           format: uuid
@@ -1026,27 +1188,155 @@ components:
           type: number
         isActive:
           type: boolean
+          nullable: true
         note:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
+          nullable: true
         updatedAt:
           type: string
           format: date-time
-    PaginationResponse:
+          nullable: true
+    PaginationResponseEndOptionDTO:
       type: object
       properties:
         content:
           type: array
+          nullable: true
           items:
-            type: object
+            $ref: "#/components/schemas/EndOptionDTO"
         totalElements:
           type: integer
           format: int64
+          nullable: true
         totalPages:
           type: integer
           format: int32
+          nullable: true
         currentPage:
           type: integer
           format: int32
+          nullable: true
+    PaginationResponseUsageRecordDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/UsageRecordDTO"
+        totalElements:
+          type: integer
+          format: int64
+          nullable: true
+        totalPages:
+          type: integer
+          format: int32
+          nullable: true
+        currentPage:
+          type: integer
+          format: int32
+          nullable: true
+    PaginationResponseServiceEventDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/ServiceEventDTO"
+        totalElements:
+          type: integer
+          format: int64
+          nullable: true
+        totalPages:
+          type: integer
+          format: int32
+          nullable: true
+        currentPage:
+          type: integer
+          format: int32
+          nullable: true
+    PaginationResponseReturnRecordDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/ReturnRecordDTO"
+        totalElements:
+          type: integer
+          format: int64
+          nullable: true
+        totalPages:
+          type: integer
+          format: int32
+          nullable: true
+        currentPage:
+          type: integer
+          format: int32
+          nullable: true
+    PaginationResponsePickupRecordDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/PickupRecordDTO"
+        totalElements:
+          type: integer
+          format: int64
+          nullable: true
+        totalPages:
+          type: integer
+          format: int32
+          nullable: true
+        currentPage:
+          type: integer
+          format: int32
+          nullable: true
+    PaginationResponseDeliveryRecordDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/DeliveryRecordDTO"
+        totalElements:
+          type: integer
+          format: int64
+          nullable: true
+        totalPages:
+          type: integer
+          format: int32
+          nullable: true
+        currentPage:
+          type: integer
+          format: int32
+          nullable: true
+    PaginationResponseAssetFinanceAssetDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/AssetFinanceAssetDTO"
+        totalElements:
+          type: integer
+          format: int64
+          nullable: true
+        totalPages:
+          type: integer
+          format: int32
+          nullable: true
+        currentPage:
+          type: integer
+          format: int32
+          nullable: true

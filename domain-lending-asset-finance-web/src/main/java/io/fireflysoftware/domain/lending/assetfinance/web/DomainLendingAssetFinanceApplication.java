@@ -29,9 +29,8 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 /**
  * Entry point for the domain-lending-asset-finance microservice.
  *
- * <p>This service is the orchestration layer for asset finance workflows (renting and leasing).
- * It coordinates calls to {@code core-lending-asset-finance} via CQRS commands and exposes
- * a domain-level REST API for experience-layer consumers.
+ * <p>This service is the saga in front of asset finance agreements.
+ * Product kinds are LEASING and RENTING, passed through as financeType.
  */
 @SpringBootApplication(
         scanBasePackages = {

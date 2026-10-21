@@ -46,7 +46,7 @@ public class AssetFinanceAgreementSummaryDTO {
     @Schema(description = "Loan servicing case this agreement is linked to")
     private UUID loanServicingCaseId;
 
-    @Schema(description = "Finance type: RENTING or LEASING")
+    @Schema(description = "Finance type: LEASING (financial lease with a purchase option) or RENTING (operating rental without a purchase option)")
     private String financeType;
 
     @Schema(description = "Current agreement status")

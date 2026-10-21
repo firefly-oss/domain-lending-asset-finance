@@ -71,6 +71,25 @@ public interface AssetFinanceService {
      */
     Mono<AssetFinanceAgreementDTO> updateAgreement(UUID agreementId, AssetFinanceAgreementDTO dto);
 
+    /**
+     * Changes the agreement status through the status saga. The product kind already stored is kept.
+     *
+     * @param agreementId  the unique identifier of the agreement
+     * @param status       the target status
+     * @param statusReason optional reason recorded on the agreement remarks
+     * @return the updated agreement
+     */
+    Mono<AssetFinanceAgreementDTO> updateAgreementStatus(UUID agreementId, String status, String statusReason);
+
+    /**
+     * Closes the agreement when the asset finance core allows CLOSED.
+     *
+     * @param agreementId  the unique identifier of the agreement
+     * @param statusReason optional closing reason
+     * @return the closed agreement
+     */
+    Mono<AssetFinanceAgreementDTO> closeAgreement(UUID agreementId, String statusReason);
+
     // ── Assets ───────────────────────────────────────────────────────────────
 
     /**

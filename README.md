@@ -1,9 +1,9 @@
 <a href="https://fireflysoftware.io/openplatform/">
 <picture>
-  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/firefly-oss/.github/main/profile/assets/banner-narrow-dark.svg">
-  <source media="(max-width: 640px)" srcset="https://raw.githubusercontent.com/firefly-oss/.github/main/profile/assets/banner-narrow-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/firefly-oss/.github/main/profile/assets/banner-dark.svg">
-  <img src="https://raw.githubusercontent.com/firefly-oss/.github/main/profile/assets/banner-light.svg" alt="Firefly OpenPlatform - Domain Lending - Asset Finance" width="100%">
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/fireflysoftwaresolutions/.github/main/profile/assets/banner-narrow-dark.svg">
+  <source media="(max-width: 640px)" srcset="https://raw.githubusercontent.com/fireflysoftwaresolutions/.github/main/profile/assets/banner-narrow-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/fireflysoftwaresolutions/.github/main/profile/assets/banner-dark.svg">
+  <img src="https://raw.githubusercontent.com/fireflysoftwaresolutions/.github/main/profile/assets/banner-light.svg" alt="Firefly OpenPlatform - Domain Lending - Asset Finance" width="100%">
 </picture>
 </a>
 
@@ -13,7 +13,16 @@ Developed by the Firefly Software Foundation. [dev@fireflysoftware.io](mailto:de
 
 [Website](https://fireflysoftware.io/) · [OpenPlatform](https://fireflysoftware.io/openplatform/) · [Module catalogue](https://fireflysoftware.io/openplatform/modules/)
 
-> Domain-layer orchestration microservice for asset finance workflows, covering the full lifecycle of renting and leasing agreements.
+> Domain saga for asset finance agreements. This service passes `financeType` through to `core-lending-asset-finance`.
+
+Stored product kinds:
+
+| Kind | Meaning |
+|------|---------|
+| `LEASING` | Financial lease with a purchase option |
+| `RENTING` | Operating rental without a purchase option |
+
+Create, update, status change, and close run as compensating sagas. A field update leaves status unchanged. Close writes `CLOSED` when the core lifecycle allows that move.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -78,9 +87,11 @@ All endpoints are prefixed with `/api/v1/asset-finance` and produce/consume `app
 
 | Method | Path | Description | Success Status |
 |--------|------|-------------|----------------|
-| `POST` | `/agreements` | Create a new asset finance agreement | `201 Created` |
+| `POST` | `/agreements` | Create a new asset finance agreement. `financeType` is `LEASING` or `RENTING`. | `201 Created` |
 | `GET` | `/agreements/{agreementId}` | Retrieve an agreement by ID | `200 OK` / `404 Not Found` |
-| `PUT` | `/agreements/{agreementId}` | Update an existing agreement | `200 OK` / `404 Not Found` |
+| `PUT` | `/agreements/{agreementId}` | Update an existing agreement. Status is left unchanged. The product kind is passed through. | `200 OK` / `404 Not Found` |
+| `PUT` | `/agreements/{agreementId}/status` | Change status. The stored product kind is kept. | `200 OK` / `404 Not Found` |
+| `POST` | `/agreements/{agreementId}/close` | Close the agreement when the core allows `CLOSED` | `200 OK` / `404 Not Found` |
 
 ### Assets
 

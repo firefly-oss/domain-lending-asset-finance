@@ -50,11 +50,17 @@ import io.fireflysoftware.domain.lending.assetfinance.core.commands.RegisterRetu
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.RegisterServiceEventCommand;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.ReportUsageCommand;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.UpdateAgreementCommand;
+import io.fireflysoftware.domain.lending.assetfinance.core.commands.UpdateAgreementStatusCommand;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.UpdateEndOptionCommand;
+import io.fireflysoftware.domain.lending.assetfinance.core.constants.AssetFinanceAgreementSagaConstants;
+import io.fireflysoftware.domain.lending.assetfinance.core.lifecycle.AssetFinanceAgreementLifecycle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.command.CommandBus;
 import org.fireflyframework.cqrs.query.QueryBus;
+import org.fireflyframework.orchestration.saga.engine.SagaEngine;
+import org.fireflyframework.orchestration.saga.engine.SagaResult;
+import org.fireflyframework.orchestration.saga.engine.StepInputs;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -73,12 +79,20 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
 
     private final CommandBus commandBus;
     private final QueryBus queryBus;
+    private final SagaEngine sagaEngine;
 
     // ── Agreements ──────────────────────────────────────────────────────────
 
     @Override
     public Mono<AssetFinanceAgreementDTO> createAgreement(AssetFinanceAgreementDTO dto) {
-        return commandBus.send(new CreateAgreementCommand(dto));
+        if (dto == null || dto.getFinanceType() == null) {
+            return Mono.error(new IllegalArgumentException("Finance type is required"));
+        }
+        StepInputs inputs = StepInputs.builder()
+                .forStepId(AssetFinanceAgreementSagaConstants.STEP_REGISTER, new CreateAgreementCommand(dto))
+                .build();
+        return sagaEngine.execute(AssetFinanceAgreementSagaConstants.SAGA_REGISTER, inputs)
+                .flatMap(result -> outcome(result, AssetFinanceAgreementSagaConstants.STEP_REGISTER, AssetFinanceAgreementDTO.class));
     }
 
     @Override
@@ -88,7 +102,49 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
 
     @Override
     public Mono<AssetFinanceAgreementDTO> updateAgreement(UUID agreementId, AssetFinanceAgreementDTO dto) {
-        return commandBus.send(new UpdateAgreementCommand(agreementId, dto));
+        StepInputs inputs = StepInputs.builder()
+                .forStepId(AssetFinanceAgreementSagaConstants.STEP_RETRIEVE_FOR_UPDATE, new GetAgreementQuery(agreementId))
+                .forStepId(AssetFinanceAgreementSagaConstants.STEP_UPDATE_RECORD, new UpdateAgreementCommand(agreementId, dto))
+                .build();
+        return sagaEngine.execute(AssetFinanceAgreementSagaConstants.SAGA_UPDATE_RECORD, inputs)
+                .flatMap(result -> outcome(result, AssetFinanceAgreementSagaConstants.STEP_UPDATE_RECORD, AssetFinanceAgreementDTO.class));
+    }
+
+    @Override
+    public Mono<AssetFinanceAgreementDTO> updateAgreementStatus(UUID agreementId, String status, String statusReason) {
+        StepInputs inputs = StepInputs.builder()
+                .forStepId(AssetFinanceAgreementSagaConstants.STEP_RETRIEVE, new GetAgreementQuery(agreementId))
+                .forStepId(AssetFinanceAgreementSagaConstants.STEP_UPDATE_STATUS, new UpdateAgreementStatusCommand(agreementId, status, statusReason))
+                .build();
+        return sagaEngine.execute(AssetFinanceAgreementSagaConstants.SAGA_UPDATE_STATUS, inputs)
+                .flatMap(result -> outcome(result, AssetFinanceAgreementSagaConstants.STEP_UPDATE_STATUS, AssetFinanceAgreementDTO.class));
+    }
+
+    @Override
+    public Mono<AssetFinanceAgreementDTO> closeAgreement(UUID agreementId, String statusReason) {
+        return getAgreement(agreementId)
+                .switchIfEmpty(Mono.error(new IllegalStateException("Asset finance agreement was not found")))
+                .flatMap(current -> {
+                    if (!AssetFinanceAgreementLifecycle.canTransition(
+                            current.getAgreementStatus(), AssetFinanceAgreementDTO.AgreementStatusEnum.CLOSED)) {
+                        String from = current.getAgreementStatus() == null
+                                ? "unset"
+                                : current.getAgreementStatus().getValue();
+                        return Mono.<AssetFinanceAgreementDTO>error(new IllegalStateException(
+                                "Asset finance agreement " + agreementId + " cannot move from " + from + " to CLOSED"));
+                    }
+                    return updateAgreementStatus(agreementId, AssetFinanceAgreementDTO.AgreementStatusEnum.CLOSED.getValue(), statusReason);
+                });
+    }
+
+    private static <T> Mono<T> outcome(SagaResult result, String stepId, Class<T> type) {
+        if (result.isFailed()) {
+            Throwable error = result.error().orElseGet(() ->
+                    new IllegalStateException("Saga " + result.sagaName() + " failed"));
+            return Mono.error(error);
+        }
+        return Mono.justOrEmpty(result.resultOf(stepId, type))
+                .switchIfEmpty(Mono.error(new IllegalStateException("Saga step " + stepId + " produced no result")));
     }
 
     // ── Assets ───────────────────────────────────────────────────────────────

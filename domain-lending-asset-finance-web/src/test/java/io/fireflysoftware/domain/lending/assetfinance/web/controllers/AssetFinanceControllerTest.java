@@ -118,6 +118,38 @@ class AssetFinanceControllerTest {
                 .expectBody(AssetFinanceAgreementDTO.class);
     }
 
+    @Test
+    void updateStatus_returns200() {
+        var agreementId = UUID.randomUUID();
+        var dto = new AssetFinanceAgreementDTO();
+        when(assetFinanceService.updateAgreementStatus(eq(agreementId), eq("CLOSED"), eq("Paid off")))
+                .thenReturn(Mono.just(dto));
+
+        webTestClient.put()
+                .uri("/api/v1/asset-finance/agreements/{id}/status", agreementId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"status\":\"CLOSED\",\"statusReason\":\"Paid off\"}")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(AssetFinanceAgreementDTO.class);
+    }
+
+    @Test
+    void closeAgreement_returns200() {
+        var agreementId = UUID.randomUUID();
+        var dto = new AssetFinanceAgreementDTO();
+        when(assetFinanceService.closeAgreement(eq(agreementId), eq("End of term")))
+                .thenReturn(Mono.just(dto));
+
+        webTestClient.post()
+                .uri("/api/v1/asset-finance/agreements/{id}/close", agreementId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"statusReason\":\"End of term\"}")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(AssetFinanceAgreementDTO.class);
+    }
+
     // ── Asset tests ──────────────────────────────────────────────────────────
 
     @Test
