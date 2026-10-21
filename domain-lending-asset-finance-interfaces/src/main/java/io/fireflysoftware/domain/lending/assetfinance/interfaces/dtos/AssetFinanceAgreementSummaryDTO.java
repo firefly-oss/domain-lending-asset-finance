@@ -18,6 +18,7 @@
 package io.fireflysoftware.domain.lending.assetfinance.interfaces.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.fireflysoftware.domain.lending.assetfinance.interfaces.enums.FinanceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,7 +48,7 @@ public class AssetFinanceAgreementSummaryDTO {
     private UUID loanServicingCaseId;
 
     @Schema(description = "Finance type: LEASING (financial lease with a purchase option) or RENTING (operating rental without a purchase option)")
-    private String financeType;
+    private FinanceType financeType;
 
     @Schema(description = "Current agreement status")
     private String agreementStatus;
