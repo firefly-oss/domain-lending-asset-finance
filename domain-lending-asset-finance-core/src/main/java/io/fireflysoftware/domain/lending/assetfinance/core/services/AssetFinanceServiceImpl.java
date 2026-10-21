@@ -21,6 +21,7 @@ import io.fireflysoftware.core.lending.assetfinance.sdk.model.AssetFinanceAgreem
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.DeliveryRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.EndOptionDTO;
+import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAgreementDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
@@ -35,6 +36,7 @@ import io.fireflysoftware.core.lending.assetfinance.sdk.model.UsageRecordDTO;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.CreateAgreementCommand;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.CreateEndOptionCommand;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.GetAgreementAssetsQuery;
+import io.fireflysoftware.domain.lending.assetfinance.core.commands.ListAgreementsQuery;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.GetAgreementEndOptionsQuery;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.GetAgreementQuery;
 import io.fireflysoftware.domain.lending.assetfinance.core.commands.GetAssetDeliveriesQuery;
@@ -82,6 +84,11 @@ public class AssetFinanceServiceImpl implements AssetFinanceService {
     private final SagaEngine sagaEngine;
 
     // ── Agreements ──────────────────────────────────────────────────────────
+
+    @Override
+    public Mono<PaginationResponseAssetFinanceAgreementDTO> listAgreements() {
+        return queryBus.query(new ListAgreementsQuery());
+    }
 
     @Override
     public Mono<AssetFinanceAgreementDTO> createAgreement(AssetFinanceAgreementDTO dto) {

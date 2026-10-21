@@ -21,6 +21,7 @@ import io.fireflysoftware.core.lending.assetfinance.sdk.model.AssetFinanceAgreem
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.DeliveryRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.EndOptionDTO;
+import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAgreementDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
@@ -79,6 +80,17 @@ public class AssetFinanceController {
      * @param dto the agreement payload
      * @return 201 Created with the new agreement, or 400 on invalid input
      */
+    @Operation(summary = "List agreements", description = "Reads the agreement page from core-lending-asset-finance.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Agreements listed",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PaginationResponseAssetFinanceAgreementDTO.class)))
+    })
+    @GetMapping(value = "/agreements", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PaginationResponseAssetFinanceAgreementDTO>> listAgreements() {
+        return assetFinanceService.listAgreements().map(ResponseEntity::ok);
+    }
+
     @Operation(summary = "Create agreement", description = "Runs the register saga. The financeType is LEASING or RENTING and is passed through to the asset finance core.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Agreement created",

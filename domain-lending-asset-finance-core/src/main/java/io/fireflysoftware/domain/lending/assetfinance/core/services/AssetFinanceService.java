@@ -21,6 +21,7 @@ import io.fireflysoftware.core.lending.assetfinance.sdk.model.AssetFinanceAgreem
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.AssetFinanceAssetDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.DeliveryRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.EndOptionDTO;
+import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAgreementDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseAssetFinanceAssetDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponseDeliveryRecordDTO;
 import io.fireflysoftware.core.lending.assetfinance.sdk.model.PaginationResponsePickupRecordDTO;
@@ -52,6 +53,13 @@ public interface AssetFinanceService {
      * @param dto the agreement payload
      * @return the created agreement
      */
+    /**
+     * Lists agreements stored by the asset finance core.
+     *
+     * @return the core page
+     */
+    Mono<PaginationResponseAssetFinanceAgreementDTO> listAgreements();
+
     Mono<AssetFinanceAgreementDTO> createAgreement(AssetFinanceAgreementDTO dto);
 
     /**
